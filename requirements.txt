@@ -1,0 +1,5 @@
+pandas
+sklearn
+pickle
+pydantic
+fastapi

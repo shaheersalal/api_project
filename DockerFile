@@ -1,0 +1,51 @@
+FROM python:3.10
+
+# Install every possible build dependency
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    gcc-10 \
+    g++-10 \
+    build-essential \
+    cmake \
+    pkg-config \
+    libopenblas-dev \
+    liblapack-dev \
+    libatlas-base-dev \
+    gfortran \
+    libhdf5-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    llvm \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libffi-dev \
+    liblzma-dev \
+    python3-openssl \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set compiler flags for better optimization
+ENV CC=gcc-10
+ENV CXX=g++-10
+ENV CFLAGS="-O3 -march=native -mtune=native"
+ENV CXXFLAGS="-O3 -march=native -mtune=native"
+
+WORKDIR /app
+COPY requirements.txt .
+
+# Install with optimization
+RUN pip install --no-cache-dir --no-binary :all: -r requirements.txt
+
+COPY . .
+EXPOSE 7860
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
